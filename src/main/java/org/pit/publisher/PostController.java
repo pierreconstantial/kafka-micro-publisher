@@ -49,12 +49,12 @@ public class PostController {
   @StreamEmitter
   @Output(Source.OUTPUT)
   public Flux<Message> emit() {
-    return Flux.interval(Duration.ofSeconds(1))
-        .map(l ->
+    return Flux.interval(Duration.ofNanos(1))
+        .map(count ->
             MessageBuilder
                 .withPayload(
                     PostMessage.of("Hello World, it is " + DATE_TIME_FORMATTER.format(LocalDateTime.now())))
-                .setHeader("count", counter.next())
+                .setHeader("count", count)
                 .build()
         );
   }
