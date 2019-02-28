@@ -31,13 +31,13 @@ public class PostController {
   @Autowired
   private Counter counter;
 
-  private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
       .ofPattern("MM.dd.yyyy 'at' HH:mm:ss n");
 
   @RequestMapping(path = "/post", method = RequestMethod.POST)
   public boolean publishMessage(@RequestBody String payload) {
 
-    log.debug("Receive %s", payload);
+    log.info("Receive %s", payload);
 
     return source.output().send(MessageBuilder
         .withPayload(PostMessage.of(payload))
@@ -49,14 +49,27 @@ public class PostController {
   @StreamEmitter
   @Output(Source.OUTPUT)
   public Flux<Message> emit() {
-    return Flux.interval(Duration.ofNanos(1))
-        .map(count ->
-            MessageBuilder
-                .withPayload(
-                    PostMessage.of("Hello World, it is " + DATE_TIME_FORMATTER.format(LocalDateTime.now())))
-                .setHeader("count", count)
-                .build()
-        );
+    return Flux.interval(Duration.ofSeconds(4)).map(PostController::counterToHelloWorldMessage);
   }
+
+  private static Message counterToHelloWorldMessage(Long count) {
+    return MessageBuilder
+        .withPayload(createHelloWorldPayload(count))
+        .setHeader("count", count)
+        .build();
+  }
+
+  private static PostMessage createHelloWorldPayload(Long count) {
+    // create payload
+    PostMessage message = PostMessage
+        .of("Hello World, it is " + DATE_TIME_FORMATTER.format(LocalDateTime.now()));
+
+    // log payload and count
+    log.info("Send ("+ count + ") " + message.getMessage());
+    return message;
+  }
+
+
+
 
 }
