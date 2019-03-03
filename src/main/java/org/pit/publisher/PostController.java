@@ -1,5 +1,9 @@
 package org.pit.publisher;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.pit.publisher.model.PostMessage;
 import org.pit.publisher.tools.Counter;
@@ -39,27 +43,32 @@ public class PostController {
 
     log.info("Receive %s", payload);
 
-    return source.output().send(MessageBuilder
-        .withPayload(PostMessage.of(payload))
-        .setHeader("count", counter.next())
-        .build());
+    return source.output().send(buildMessage(
+        PostMessage.of(payload),
+        createHelloWorldHeaders(counter.next())
+    ));
   }
 
 
   @StreamEmitter
   @Output(Source.OUTPUT)
   public Flux<Message> emit() {
-    return Flux.interval(Duration.ofSeconds(4)).map(PostController::counterToHelloWorldMessage);
-  }
+    return Flux.interval(Duration.ofSeconds(4)).map(count ->
+        buildMessage(
+            createHelloWorldPayload(count),
+            createHelloWorldHeaders(count)
+        )
+    );
+  } 
 
-  private static Message counterToHelloWorldMessage(Long count) {
+  private Message buildMessage(PostMessage payload, Map<String, ?> headers) {
     return MessageBuilder
-        .withPayload(createHelloWorldPayload(count))
-        .setHeader("count", count)
+        .withPayload(payload)
+        .copyHeaders(headers)
         .build();
   }
 
-  private static PostMessage createHelloWorldPayload(Long count) {
+  private PostMessage createHelloWorldPayload(Long count) {
     // create payload
     PostMessage message = PostMessage
         .of("Hello World, it is " + DATE_TIME_FORMATTER.format(LocalDateTime.now()));
@@ -69,7 +78,13 @@ public class PostController {
     return message;
   }
 
+  private HashMap<String, Object> createHelloWorldHeaders(Long count) {
+    return init(new HashMap<>(), m -> m.put("count", count));
+  }
 
-
+  public static  <T> T init(T obj, Consumer<T> fn) {
+    fn.accept(obj);
+    return obj;
+  }
 
 }

@@ -33,10 +33,9 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-stream-reactive'
-	implementation 'org.springframework.cloud:spring-cloud-stream-binder-rabbit'
 
 	// junit 5
 	testImplementation('org.junit.jupiter:junit-jupiter-api:5.2.0')
