@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
+import org.pit.publisher.model.GoodBye;
 import org.pit.publisher.model.PostMessage;
 import org.pit.publisher.tools.Counter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,20 +53,49 @@ public class PostController {
 
   @StreamEmitter
   @Output(Source.OUTPUT)
-  public Flux<Message> emit() {
+  public Flux<Message> emitHelloWorld() {
     return Flux.interval(Duration.ofSeconds(4)).map(count ->
         buildMessage(
             createHelloWorldPayload(count),
             createHelloWorldHeaders(count)
         )
     );
-  } 
+  }
+
+  @StreamEmitter
+  @Output(Source.OUTPUT)
+  public Flux<Message> emitGoodByeEarth() {
+    return Flux.interval(Duration.ofSeconds(8)).map(count ->
+            buildMessage(
+                    createGoodByePayload(count),
+                    createGoodByeHeaders(count)
+            )
+    );
+  }
+
+
+  private <T> Message  buildMessage(T payload, Map<String, ?> headers) {
+    return MessageBuilder
+            .withPayload(payload)
+            .copyHeaders(headers)
+            .build();
+  }
 
   private Message buildMessage(PostMessage payload, Map<String, ?> headers) {
     return MessageBuilder
         .withPayload(payload)
         .copyHeaders(headers)
         .build();
+  }
+
+  private GoodBye createGoodByePayload(Long count) {
+    // create payload
+    GoodBye message = GoodBye
+            .of("Good bye, it is " + DATE_TIME_FORMATTER.format(LocalDateTime.now()));
+
+    // log payload and count
+    log.info("Send ("+ count + ") " + message.getMessage());
+    return message;
   }
 
   private PostMessage createHelloWorldPayload(Long count) {
@@ -78,8 +108,18 @@ public class PostController {
     return message;
   }
 
+  private HashMap<String, Object> createGoodByeHeaders(Long count) {
+    return init(new HashMap<>(), m -> {
+      m.put("count", count);
+      m.put("type", "GoodByeEvent");
+    });
+  }
+
   private HashMap<String, Object> createHelloWorldHeaders(Long count) {
-    return init(new HashMap<>(), m -> m.put("count", count));
+    return init(new HashMap<>(), m -> {
+      m.put("count", count);
+      m.put("type", "HelloWorldEvent");
+    });
   }
 
   public static  <T> T init(T obj, Consumer<T> fn) {
