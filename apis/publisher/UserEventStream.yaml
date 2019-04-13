@@ -1,0 +1,65 @@
+# UserEventStream, name of the file, will be used to generate UserEventStreamSource, UserEventStreamPublisher
+openapi: 3.0.1
+info:
+  title: User Event Stream
+  description: This stream provide events about users.
+  version: 0.0.1
+#servers:
+#  - url: 'https://api.example.com'
+paths:
+  /userCreated:
+    post: # not used for generator now, we stick to http meaning or we use always get???
+      operationId: userCreated # used in UserStreamPublisher for method name and 'type' parameter
+      summary: an User was created
+      description: an User was created.
+    #  parameters: # no parameters for now, maybe later header parameters?
+      responses:
+        '200': # we use systematically 200 to reference the model
+          description: the created User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /userUpdated:
+    put: # not used for generator now, we stick to http meaning or we use always get???
+      operationId: userUpdated # used in UserStreamPublisher for method name and 'type' parameter
+      summary: an User was updated
+      description: an User was updated.
+      #  parameters: # no parameters for now, maybe later header parameters?
+      responses:
+        '200': # we use systematically 200 to reference the model
+          description: the updated User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /userDeleted:
+    delete: # not used for generator now, we stick to http meaning or we use always get???
+      operationId: userDeleted  # used in UserStreamPublisher for method name and 'type' parameter
+      summary: an User was deleted
+      description: an User was deleted.
+      #  parameters: # no parameters for now, maybe later header parameters?
+      responses:
+        '200': # we use systematically 200 to reference the model
+          description: the created User
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/UserDeleted'
+components:
+  schemas:
+    User:
+      description: an user
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+    UserDeleted:
+      description: an user deletion
+      properties:
+        id:
+          type: string
