@@ -25,7 +25,7 @@ public class UserEventStreamPublisher {
     }
 
     public boolean userCreated(User message, Map<String, String> headers) {
-        return sendWithHeaders(message, addTypeHeader(headers,"userCreated"));
+        return sendWithHeaders(message, headerMap(headers,"userCreated", message.getId()));
     }
 
     public boolean userUpdated(User message) {
@@ -33,7 +33,7 @@ public class UserEventStreamPublisher {
     }
 
     public boolean userUpdated(User message, Map<String, String> headers) {
-        return sendWithHeaders(message, addTypeHeader(headers,"userUpdated"));
+        return sendWithHeaders(message, headerMap(headers,"userUpdated", message.getId()));
     }
 
     public boolean userDeleted(UserDeleted message) {
@@ -41,13 +41,14 @@ public class UserEventStreamPublisher {
     }
 
     public boolean userDeleted(UserDeleted message, Map<String, String> headers) {
-        return sendWithHeaders(message,  addTypeHeader(headers,"userDeleted"));
+        return sendWithHeaders(message,  headerMap(headers,"userDeleted", message.getId()));
     }
 
-    private Map<String, String> addTypeHeader(Map<String, String> headers, String type) {
+    private Map<String, String> headerMap(Map<String, String> headers, String type, String partitionKey) {
         Map<String, String> map = Optional.ofNullable(headers)
                 .orElse(new HashMap<>());
         map.put("type", type);
+        map.put("partitionKey", partitionKey);
         return map;
     }
 
