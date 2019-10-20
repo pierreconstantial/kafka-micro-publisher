@@ -12,13 +12,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-@RestController @Slf4j
+@RestController
+@Slf4j
 public class PubController {
 
   private final UserSpammer userPublisher;
-
   private final ScheduledExecutorService taskExecutor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());;
-
   private ScheduledFuture<?> task;
 
   public PubController(UserSpammer userSpammer) {
@@ -28,7 +27,7 @@ public class PubController {
   @RequestMapping(path = "/pub", method = RequestMethod.GET)
   public boolean publishMessage() {
     log.info("pub");
- //  userPublisher.send();
+    //  userPublisher.send();
     return true;
   }
 
@@ -37,7 +36,7 @@ public class PubController {
     log.info("spam: " + rate);
     if (task == null || task.isCancelled()) {
       task = taskExecutor.scheduleAtFixedRate(
-              userPublisher::spam, 0, rate.orElse(300), TimeUnit.MILLISECONDS);
+        userPublisher::spam, 0, rate.orElse(300), TimeUnit.MILLISECONDS);
       taskExecutor.execute(userPublisher::spam);
     }
     return rate.orElse(300);
